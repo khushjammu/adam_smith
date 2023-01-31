@@ -26,7 +26,7 @@ function TopLevelCheckbox(props) {
     props.onChange(e, props.bookName)
   }
   return (
-    <li className="mt-1" ><input type="checkbox" value={"on"} onChange={t}/> {props.bookName === 0 ? "Intro and POW" : "Book " + props.bookName}
+    <li className="mt-1" ><input type="checkbox" defaultChecked onChange={t}/> {props.bookName === 0 ? "Intro and POW" : "Book " + props.bookName}
       <ul className="pl-5">
         {lis}
       </ul>
@@ -42,7 +42,7 @@ function App() {
   const [answer, setAnswer] = useState("");
   const [sources, setSources] = useState([]);
   const [searchText, setSearchText] = useState("");
-  const [bookNames, setBookNames] = useState([]) // 1,2,3,4,5
+  const [bookNames, setBookNames] = useState([0,1,2,3,4,5]) // 1,2,3,4,5
 
   const [numClosest, setNumClosest] = useState("3");
 
@@ -53,13 +53,10 @@ function App() {
   };
 
   const renderSources = () => {
-    if (sources.length === 0) {
-      console.log("EMPTY")
-    } else {
+    if (sources.length !== 0) {
       const listItems = sources.map(
         (d) => (
           <div>
-            
             <h1 className="text-lg">{d.info}</h1>
             <p><i>{d.text}</i></p>
             <br/>
@@ -80,9 +77,18 @@ function App() {
     setSources([])
     inputRef.current.blur()
 
+    if (searchText.trim() === "") {
+      setAnswer("Please enter a query into the search box.")
+      return
+    } else if (bookNames.length === 0) {
+      setAnswer("Please select at least one book.")
+      return
+    }
+
     fetch("http://localhost:5000/?query=" + searchText + "&books=[" + bookNames + "]")
       .then(res => {
         if (!res.ok) {
+          setAnswer("Unfortunately, we have encountered an error. Please alert Khush with the following error message: error with request. " + res.statusText)
           throw Error(res.statusText)
         }
         return res;
@@ -106,25 +112,26 @@ function App() {
   };
 
   const appendBook = (e,n) => {
-    console.log(e)
+    // console.log(e)
     if (e.target.checked) {
       setBookNames(bookNames.concat([n]))
     } else {
-      console.log("removing", n)
+      // console.log("removing", n)
       let index = bookNames.indexOf(n)
       let new_list = bookNames
       new_list.splice(index, 1)
+      // console.log("new_list", new_list)
       setBookNames(new_list)
-
     }
     // console.log('n', n)
   }
-  console.log("books", bookNames)
+
   return (
     <div className="flex my-10 font-serif">
       <div className="mx-10">
         <h1 className="text-xl">Options</h1>
-        <h1 className="text-lg">No. Paragraphs</h1>
+        
+        {/*<h1 className="text-lg">No. Paragraphs</h1>
         <input
           // className="flex-grow px-2 !outline-none border-transparent focus:border-transparent focus:ring-0"
           type = "number" 
@@ -133,10 +140,10 @@ function App() {
           value={numClosest}
           // ref={inputRef}
           autoFocus
-        />
+        />*/}
         <h1 className="text-lg mt-2">Content Included</h1>
         <ul className="list-none">
-          <TopLevelCheckbox onChange={appendBook} bookName={0}/>
+          <TopLevelCheckbox onChange={appendBook} bookName={0} />
           <TopLevelCheckbox onChange={appendBook} bookName={1} numChapters={11} hasIntro="yes"/>
           <TopLevelCheckbox onChange={appendBook} bookName={2} numChapters={5}/>
           <TopLevelCheckbox onChange={appendBook} bookName={3} numChapters={4}/>
