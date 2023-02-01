@@ -47,10 +47,6 @@ function App() {
 
   const inputRef = useRef(null);
 
-  const handleChange = e => {
-    setSearchText(e.target.value);
-  };
-
   const renderSources = () => {
     if (sources.length !== 0) {
       const listItems = sources.map(
@@ -111,7 +107,6 @@ function App() {
   };
 
   const appendBook = (e,n) => {
-    console.log('n', n)
     let target_list = bookNames[selectedBook];
     if (e.target.checked) {
       target_list = target_list.concat([n])
@@ -121,30 +116,23 @@ function App() {
     }
     setBookNames({...bookNames, [selectedBook]: target_list})
   }
-  console.log(bookNames)
 
   const generateSectionOptions = () => {
     let l = []
     if (selectedBook === "wealth_of_nations") {
-      l.push(<TopLevelCheckbox onChange={appendBook} bookName={0} prefix={"Intro and POW"} checked={bookNames[selectedBook].includes(0)}/>)
+      l.push(<TopLevelCheckbox onChange={appendBook} key={0} bookName={0} prefix={"Intro and POW"} checked={bookNames[selectedBook].includes(0)}/>)
       for (let i = 1; i <= 5; i++) {
-        l.push(<TopLevelCheckbox onChange={appendBook} bookName={i} prefix={"Chapter "} checked={bookNames[selectedBook].includes(i)}/>)
+        l.push(<TopLevelCheckbox onChange={appendBook} key={i} bookName={i} prefix={"Chapter "} checked={bookNames[selectedBook].includes(i)}/>)
       }
     } else if (selectedBook === "leviathan") {
       for (let i = 1; i <= 4; i++) {
-        l.push(<TopLevelCheckbox onChange={appendBook} bookName={i} prefix={"Part "} checked={bookNames[selectedBook].includes(i)}/>)
+        l.push(<TopLevelCheckbox onChange={appendBook} key={i} bookName={i} prefix={"Part "} checked={bookNames[selectedBook].includes(i)}/>)
       }
     }
 
     return (
       <ul className="list-none">
         {l}
-        {/*<TopLevelCheckbox onChange={appendBook} bookName={0} />
-        <TopLevelCheckbox onChange={appendBook} bookName={1} numChapters={11} hasIntro="yes"/>
-        <TopLevelCheckbox onChange={appendBook} bookName={2} numChapters={5}/>
-        <TopLevelCheckbox onChange={appendBook} bookName={3} numChapters={4}/>
-        <TopLevelCheckbox onChange={appendBook} bookName={4} numChapters={9}/>
-        <TopLevelCheckbox onChange={appendBook} bookName={5} numChapters={3}/>*/}
       </ul>
     )
   }
@@ -158,16 +146,6 @@ function App() {
           <option value="leviathan">Leviathan</option>
           <option value="wealth_of_nations">The Wealth of Nations</option>
         </select>
-        {/*<h1 className="text-lg">No. Paragraphs</h1>
-        <input
-          // className="flex-grow px-2 !outline-none border-transparent focus:border-transparent focus:ring-0"
-          type = "number" 
-          placeholder = "Ask anything about the Wealth of Nations..." 
-          onChange = {(e) => setNumClosest(e.target.value)}
-          value={numClosest}
-          // ref={inputRef}
-          autoFocus
-        />*/}
         <h1 className="text-lg mt-2">Content Included</h1>
         {generateSectionOptions()}
       </div>
@@ -177,8 +155,8 @@ function App() {
           <input
             className="flex-grow px-2 !outline-none border-transparent focus:border-transparent focus:ring-0"
             type = "search" 
-            placeholder = "Ask anything about the Leviathan..." 
-            onChange = {handleChange}
+            placeholder = {"Ask anything about the " + (selectedBook === "leviathan" ? "Leviathan" : "Wealth of Nations") + "..."} 
+            onChange = {(e) => setSearchText(e.target.value)}
             value={searchText}
             ref={inputRef}
             autoFocus
