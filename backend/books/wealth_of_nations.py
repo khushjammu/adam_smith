@@ -2,53 +2,13 @@ import roman
 import pickle
 from typing import Optional, AbstractSet, Mapping
 
-class Book:
-  books: AbstractSet[int]
-  num_books: int = None #
-  full_text: Mapping[str, str]
+from .abstract_book import AbstractBook
 
-  def _is_valid_bookNames(self, bookNames):
-    # TODO: add validation to ensure bookNames are...valid lmao
-    raise NotImplementedError
-
-    if len(bookNames) > self.num_books:
-      return (False, "More books supplied than exist.")
-    else:
-      books_not_found = []
-      for book in bookNames:
-        if book not in self.books:
-          books_not_found.append(book)
-
-      return (False, "Non-existent books supplied: [" + ",".join(books_not_found) + "]")
-
-  def construct_filter(self, bookNames):
-    """
-    Constructs filter for pinecone query.
-
-    Simple logic to minimise the number of comparisons. If all books, filter excluded. If
-    more books removed than included, use $in. Else, use $nin.
-    """
-
-    if len(bookNames) == self.num_books:
-      return None
-    elif len(bookNames) <= self.num_books / 2:
-      return {
-        "book": {"$in": bookNames}
-      }
-    else:
-      return {
-        "book": {"$nin": list(self.books.difference(set(bookNames)))} # do i need to convert to list
-      }
-
-  def convert_match_to_text(self, book_num, chapter_num, paragraph_num):
-    """
-    Converts single match to a source object.
-    """
-
-    raise NotImplementedError
-
-class WealthOfNations(Book):
+class WealthOfNations(AbstractBook):
   def __init__(self):
+    self.namespace = ""
+    self.top_level_field = "book"
+
     self.books = set(range(6))
     self.num_books = len(self.books)
     
@@ -61,7 +21,11 @@ class WealthOfNations(Book):
 
     self.full_text = final_dump
 
-  def convert_match_to_text(self, book_num, chapter_num, paragraph_num):
+  def convert_match_to_text(self, match):
+    book_num = int(match['metadata']['book'])
+    chapter_num = int(match['metadata']['chapter'])
+    paragraph_num = int(match['id'].split(".")[-1])-1
+
     if book_num == 0:
       # handle intro case:
       return {

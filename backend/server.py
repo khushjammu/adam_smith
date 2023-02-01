@@ -9,8 +9,14 @@ import openai
 from openai.embeddings_utils import get_embedding, distances_from_embeddings, indices_of_nearest_neighbors_from_distances
 
 import books.wealth_of_nations
+import books.leviathan
 
-w = books.wealth_of_nations.WealthOfNations()
+BOOK_INDEX = {
+  "wealth_of_nations": books.wealth_of_nations.WealthOfNations(),
+  "leviathan": books.leviathan.Leviathan()
+}
+
+# w = books.wealth_of_nations.WealthOfNations()
 
 app = Flask(__name__)
 CORS(app)
@@ -49,10 +55,23 @@ def test():
 
 @app.route("/")
 def adam_smith():
+  book = request.args.get("book")
   query = request.args.get("query")
   bookNames = eval(request.args.get("books"))
 
-  if query is None or query == '':
+  if book is None or book == '':
+    return {
+      'status': 1,
+      'error': 'no_book',
+      'msg': '`book` not supplied'
+    }
+  elif book not in BOOK_INDEX.keys():
+    return {
+      'status': 1,
+      'error': 'invalid_book',
+      'msg': '`book` does not exist'
+    }
+  elif query is None or query == '':
     return {
       'status': 1,
       'error': 'no_query',
@@ -65,24 +84,23 @@ def adam_smith():
       'msg': '`books` not supplied'
     }
 
+  w = BOOK_INDEX[book]
+
   query_embedding = get_embedding(query, engine='text-embedding-ada-002')
   filter_dict = w.construct_filter(bookNames)
-
   nearest = index.query(
       vector=query_embedding,
       filter=filter_dict,
       top_k=3,
-      include_metadata=True
+      include_metadata=True,
+      namespace=w.namespace
   )
+  print("nearest", nearest)
 
   sources = [] # {"text": "", "info": Chapter x}
 
   for match in nearest['matches']:
-    book_num = int(match['metadata']['book'])
-    chapter_num = int(match['metadata']['chapter'])
-    paragraph_num = int(match['id'].split(".")[-1])-1
-
-    sources.append(w.convert_match_to_text(book_num, chapter_num, paragraph_num))
+    sources.append(w.convert_match_to_text(match))
 
   body_text = '\n'.join([a['text'] for a in sources])
 

@@ -61,18 +61,18 @@ final = {}
 current_book = ""
 
 
-def insert_into(target_d, book, chapter, text):
-  if book not in final.keys():
-    final[book] = {}
+# def insert_into(target_d, book, chapter, text):
+#   if book not in final.keys():
+#     final[book] = {}
 
-  final[book][chapter] = text
+#   final[book][chapter] = text
 
-for title, body in book:
-  if "book" in title.lower():
-    current_book = title.replace("\n", " ").split('.')[0]
+# for title, body in book:
+#   if "book" in title.lower():
+#     current_book = title.replace("\n", " ").split('.')[0]
 
-    # sometimes, there's an introduction which gets dropped
-    if "body" != []:
-      insert_into(final, current_book, "0", body)
-  else:
-    insert_into(final, current_book, title.replace("\n", " ").split('.')[0], body)
+#     # sometimes, there's an introduction which gets dropped
+#     if "body" != []:
+#       insert_into(final, current_book, "0", body)
+#   else:
+#     insert_into(final, current_book, title.replace("\n", " ").split('.')[0], body)

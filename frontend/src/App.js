@@ -19,14 +19,14 @@ function _romanize (num) {
 function TopLevelCheckbox(props) {
   let lis = [];
 
-  // for (var i = 1; i <= props.numChapters; i++) {
-  //   lis.push(<li key={i}><input type="checkbox" checked/> Chapter {_romanize(i)}</li>)
-  // }
   const t = e => {
     props.onChange(e, props.bookName)
   }
+
+  // my approach of passing the parent props with {...props} is a bit risky because we pass onChange
+  // to TopLevelCheckbox but that needs to be wrapped with the function t. just be aware of it...
   return (
-    <li className="mt-1" ><input type="checkbox" defaultChecked onChange={t}/> {props.bookName === 0 ? "Intro and POW" : "Book " + props.bookName}
+    <li className="mt-1" ><input  checked={props.checked} type="checkbox" onChange={t}/> {props.bookName === 0 ? "Intro and POW" : props.prefix + props.bookName}
       <ul className="pl-5">
         {lis}
       </ul>
@@ -42,9 +42,8 @@ function App() {
   const [answer, setAnswer] = useState("");
   const [sources, setSources] = useState([]);
   const [searchText, setSearchText] = useState("");
-  const [bookNames, setBookNames] = useState([0,1,2,3,4,5]) // 1,2,3,4,5
-
-  const [numClosest, setNumClosest] = useState("3");
+  const [bookNames, setBookNames] = useState({"wealth_of_nations": [0,1,2,3,4,5], "leviathan": [1,2,3,4]}) // 1,2,3,4,5
+  const [selectedBook, setSelectedBook] = useState("leviathan")
 
   const inputRef = useRef(null);
 
@@ -80,12 +79,12 @@ function App() {
     if (searchText.trim() === "") {
       setAnswer("Please enter a query into the search box.")
       return
-    } else if (bookNames.length === 0) {
+    } else if (bookNames[selectedBook].length === 0) {
       setAnswer("Please select at least one book.")
       return
     }
 
-    fetch("http://localhost:5000/?query=" + searchText + "&books=[" + bookNames + "]")
+    fetch("http://localhost:5000/?book=" + selectedBook + "&query=" + searchText + "&books=[" + bookNames[selectedBook] + "]")
       .then(res => {
         if (!res.ok) {
           setAnswer("Unfortunately, we have encountered an error. Please alert Khush with the following error message: error with request. " + res.statusText)
@@ -112,25 +111,53 @@ function App() {
   };
 
   const appendBook = (e,n) => {
-    // console.log(e)
+    console.log('n', n)
+    let target_list = bookNames[selectedBook];
     if (e.target.checked) {
-      setBookNames(bookNames.concat([n]))
+      target_list = target_list.concat([n])
     } else {
-      // console.log("removing", n)
-      let index = bookNames.indexOf(n)
-      let new_list = bookNames
-      new_list.splice(index, 1)
-      // console.log("new_list", new_list)
-      setBookNames(new_list)
+      let index = target_list.indexOf(n)
+      target_list.splice(index, 1)
     }
-    // console.log('n', n)
+    setBookNames({...bookNames, [selectedBook]: target_list})
+  }
+  console.log(bookNames)
+
+  const generateSectionOptions = () => {
+    let l = []
+    if (selectedBook === "wealth_of_nations") {
+      l.push(<TopLevelCheckbox onChange={appendBook} bookName={0} prefix={"Intro and POW"} checked={bookNames[selectedBook].includes(0)}/>)
+      for (let i = 1; i <= 5; i++) {
+        l.push(<TopLevelCheckbox onChange={appendBook} bookName={i} prefix={"Chapter "} checked={bookNames[selectedBook].includes(i)}/>)
+      }
+    } else if (selectedBook === "leviathan") {
+      for (let i = 1; i <= 4; i++) {
+        l.push(<TopLevelCheckbox onChange={appendBook} bookName={i} prefix={"Part "} checked={bookNames[selectedBook].includes(i)}/>)
+      }
+    }
+
+    return (
+      <ul className="list-none">
+        {l}
+        {/*<TopLevelCheckbox onChange={appendBook} bookName={0} />
+        <TopLevelCheckbox onChange={appendBook} bookName={1} numChapters={11} hasIntro="yes"/>
+        <TopLevelCheckbox onChange={appendBook} bookName={2} numChapters={5}/>
+        <TopLevelCheckbox onChange={appendBook} bookName={3} numChapters={4}/>
+        <TopLevelCheckbox onChange={appendBook} bookName={4} numChapters={9}/>
+        <TopLevelCheckbox onChange={appendBook} bookName={5} numChapters={3}/>*/}
+      </ul>
+    )
   }
 
   return (
     <div className="flex my-10 font-serif">
       <div className="mx-10">
         <h1 className="text-xl">Options</h1>
-        
+        <h1 className="text-lg">Book</h1>
+        <select onChange={(e) => {setSelectedBook(e.target.value)}} name="cars" id="cars">
+          <option value="leviathan">Leviathan</option>
+          <option value="wealth_of_nations">The Wealth of Nations</option>
+        </select>
         {/*<h1 className="text-lg">No. Paragraphs</h1>
         <input
           // className="flex-grow px-2 !outline-none border-transparent focus:border-transparent focus:ring-0"
@@ -142,14 +169,7 @@ function App() {
           autoFocus
         />*/}
         <h1 className="text-lg mt-2">Content Included</h1>
-        <ul className="list-none">
-          <TopLevelCheckbox onChange={appendBook} bookName={0} />
-          <TopLevelCheckbox onChange={appendBook} bookName={1} numChapters={11} hasIntro="yes"/>
-          <TopLevelCheckbox onChange={appendBook} bookName={2} numChapters={5}/>
-          <TopLevelCheckbox onChange={appendBook} bookName={3} numChapters={4}/>
-          <TopLevelCheckbox onChange={appendBook} bookName={4} numChapters={9}/>
-          <TopLevelCheckbox onChange={appendBook} bookName={5} numChapters={3}/>
-        </ul>
+        {generateSectionOptions()}
       </div>
       <div className="w-2/3">
         <form className="flex flex-row space-x-2 px-2 py-2 text-lg border border-black rounded-lg" onSubmit={handleSubmit}>
@@ -157,7 +177,7 @@ function App() {
           <input
             className="flex-grow px-2 !outline-none border-transparent focus:border-transparent focus:ring-0"
             type = "search" 
-            placeholder = "Ask anything about the Wealth of Nations..." 
+            placeholder = "Ask anything about the Leviathan..." 
             onChange = {handleChange}
             value={searchText}
             ref={inputRef}
