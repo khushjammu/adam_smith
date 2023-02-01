@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/khushjammu.com/adam_smith/static/css/main.b83213d9.css",
-    "main.js": "/khushjammu.com/adam_smith/static/js/main.ebe16ce5.js",
-    "static/js/787.cda612ba.chunk.js": "/khushjammu.com/adam_smith/static/js/787.cda612ba.chunk.js",
-    "index.html": "/khushjammu.com/adam_smith/index.html",
-    "main.b83213d9.css.map": "/khushjammu.com/adam_smith/static/css/main.b83213d9.css.map",
-    "main.ebe16ce5.js.map": "/khushjammu.com/adam_smith/static/js/main.ebe16ce5.js.map",
-    "787.cda612ba.chunk.js.map": "/khushjammu.com/adam_smith/static/js/787.cda612ba.chunk.js.map"
+    "main.css": "/adam_smith/static/css/main.b83213d9.css",
+    "main.js": "/adam_smith/static/js/main.f5825a53.js",
+    "static/js/787.cda612ba.chunk.js": "/adam_smith/static/js/787.cda612ba.chunk.js",
+    "index.html": "/adam_smith/index.html",
+    "main.b83213d9.css.map": "/adam_smith/static/css/main.b83213d9.css.map",
+    "main.f5825a53.js.map": "/adam_smith/static/js/main.f5825a53.js.map",
+    "787.cda612ba.chunk.js.map": "/adam_smith/static/js/787.cda612ba.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.b83213d9.css",
-    "static/js/main.ebe16ce5.js"
+    "static/js/main.f5825a53.js"
   ]
 }
