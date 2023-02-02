@@ -80,7 +80,7 @@ function App() {
       return
     }
 
-    fetch("http://localhost:5000/?book=" + selectedBook + "&query=" + searchText + "&books=[" + bookNames[selectedBook] + "]")
+    fetch("http://34.71.99.182:8080/?book=" + selectedBook + "&query=" + searchText + "&books=[" + bookNames[selectedBook] + "]")
       .then(res => {
         if (!res.ok) {
           setAnswer("Unfortunately, we have encountered an error. Please alert Khush with the following error message: error with request. " + res.statusText)
